@@ -5,7 +5,7 @@
 <h1 align="center">ContextJira</h1>
 
 <p align="center">
-  <strong>AI-Native Context Selection for Jira</strong><br>
+  <strong>Chrome Extension — AI-Native Context Selection for Jira</strong><br>
   Extract structured Markdown from any Jira issue — ready to paste into Claude, ChatGPT, or any LLM.
 </p>
 
