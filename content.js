@@ -433,6 +433,7 @@
   }
 
   function flashBtn(btn, success, label) {
+    if (!btn) return;
     const orig = btn.innerHTML;
     btn.innerHTML = success
       ? '<span class="cj-icon">&#10003;</span> Copied'
@@ -669,27 +670,29 @@
     // Download single
     panel.querySelectorAll('.cj-dl-one').forEach((btn) => {
       btn.addEventListener('click', (e) => {
-        const idx = parseInt(e.currentTarget.dataset.idx);
+        const target = e.currentTarget;
+        const idx = parseInt(target.dataset.idx);
         const att = attachments[idx];
         const folder = folderInput?.value.trim() || '';
         chrome.runtime.sendMessage({
           action: 'downloadFile', url: att.url, filename: att.filename, folder
         }, (resp) => {
-          flashBtn(e.currentTarget, resp?.success);
+          flashBtn(target, resp?.success);
         });
       });
     });
 
     // Download all
     panel.querySelector('.cj-dl-all')?.addEventListener('click', (e) => {
+      const target = e.currentTarget;
       const folder = folderInput?.value.trim() || '';
       chrome.runtime.sendMessage({
         action: 'downloadAll', files: attachments, folder
       }, (resp) => {
         if (resp?.success) {
-          e.currentTarget.innerHTML = `&#10003; Done (${resp.total - resp.failed}/${resp.total})`;
+          target.innerHTML = `&#10003; Done (${resp.total - resp.failed}/${resp.total})`;
           setTimeout(() => {
-            e.currentTarget.innerHTML = `Download All (${attachments.length})`;
+            target.innerHTML = `Download All (${attachments.length})`;
           }, 2000);
         }
       });
