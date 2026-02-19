@@ -17,6 +17,10 @@
 
 ---
 
+<p align="center">
+  <img src="assets/SS.png" alt="ContextJira Panel" width="420" />
+</p>
+
 ## What It Does
 
 ContextJira sits on any Jira page and extracts issue data into clean, structured Markdown that LLMs can actually use. No more copy-pasting fragments or losing formatting.
