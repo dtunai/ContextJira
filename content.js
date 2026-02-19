@@ -247,62 +247,74 @@
   function getComments() {
     const comments = [];
 
-    // Method 1: Current Jira Cloud — each comment is a custom-comment.container
-    const containers = document.querySelectorAll('[data-testid="issue-comment-base.ui.comment.custom-comment.container"]');
-    containers.forEach((el) => {
-      // Header has testid ending in -header, body ending in -body
-      const headerEl = el.querySelector('[data-testid$="-header"]');
-      const bodyEl = el.querySelector('[data-testid$="-body"]');
-      const timeEl = el.querySelector('time[datetime]');
+    try {
+      // Method 1: Current Jira Cloud — ak-comment containers with numbered IDs
+      const akComments = document.querySelectorAll('[data-testid*="issue-comment-base.ui.comment.ak-comment."][data-testid$="-body"]');
 
-      // Author: first meaningful text in the header (before "More actions" and date)
-      let author = 'Unknown';
-      if (headerEl) {
-        const authorLink = headerEl.querySelector('a[data-testid*="user-hover"]') ||
-                           headerEl.querySelector('a[href*="/people/"]') ||
-                           headerEl.querySelector('span[data-testid*="avatar"] + span');
-        if (authorLink) {
-          author = authorLink.textContent.trim();
-        } else {
-          // Fallback: grab first text that isn't "More actions" or a date
-          const walker = document.createTreeWalker(headerEl, NodeFilter.SHOW_TEXT);
-          let node;
-          while (node = walker.nextNode()) {
-            const text = node.textContent.trim();
-            if (text && text !== 'More actions' && !text.match(/^\d/) && text.length > 1) {
-              author = text;
-              break;
+      akComments.forEach((bodyEl) => {
+        // From body (ak-comment.XXXXX-body), derive the header sibling (ak-comment.XXXXX-header)
+        const bodyTestId = bodyEl.dataset.testid;
+        const headerTestId = bodyTestId.replace(/-body$/, '-header');
+        const headerEl = bodyEl.parentElement?.querySelector(`[data-testid="${headerTestId}"]`);
+
+        // Author: find profilecard trigger link in header
+        let author = 'Unknown';
+        if (headerEl) {
+          const profileTrigger = headerEl.querySelector('[data-testid*="profilecard"] a') ||
+                                 headerEl.querySelector('[data-testid*="profilecard-trigger"]');
+          if (profileTrigger) {
+            author = profileTrigger.textContent.trim();
+          }
+          // Fallback: first non-empty text node that isn't UI chrome
+          if (author === 'Unknown' || !author) {
+            const walker = document.createTreeWalker(headerEl, NodeFilter.SHOW_TEXT);
+            let node;
+            while (node = walker.nextNode()) {
+              const text = node.textContent.trim();
+              if (text && text !== 'More actions' && !text.match(/^(January|February|March|April|May|June|July|August|September|October|November|December)/) && text.length > 1) {
+                author = text;
+                break;
+              }
             }
           }
         }
-      }
 
-      if (bodyEl) {
+        // Date: look for time element or parse date text from header
+        let date = '';
+        const timeEl = headerEl?.querySelector('time[datetime]');
+        if (timeEl) {
+          date = timeEl.getAttribute('datetime');
+        } else if (headerEl) {
+          // Jira Cloud sometimes uses text dates like "February 9, 2026 at 10:52 PM"
+          const dateMatch = headerEl.textContent.match(/((?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},\s+\d{4}(?:\s+at\s+\d{1,2}:\d{2}\s*[AP]M)?)/);
+          if (dateMatch) date = dateMatch[1];
+        }
+
         const body = domToMarkdown(bodyEl.cloneNode(true)).trim();
-        if (body) {
-          comments.push({
-            author,
-            date: timeEl?.getAttribute('datetime') || '',
-            body
-          });
-        }
-      }
-    });
-
-    // Method 2: Older Jira Cloud / Server fallback
-    if (comments.length === 0) {
-      document.querySelectorAll('[data-testid*="comment-base-item"], .activity-comment').forEach((el) => {
-        const authorEl = el.querySelector('[data-testid*="header-author"] span, .author');
-        const timeEl = el.querySelector('time[datetime]');
-        const bodyEl = el.querySelector('[data-testid*="comment-body"], .comment-body');
-        if (bodyEl) {
-          comments.push({
-            author: authorEl?.textContent.trim() || 'Unknown',
-            date: timeEl?.getAttribute('datetime') || '',
-            body: domToMarkdown(bodyEl.cloneNode(true)).trim()
-          });
-        }
+        comments.push({
+          author,
+          date,
+          body: body || '(empty comment)'
+        });
       });
+
+      // Method 2: Older Jira Cloud / Server fallback
+      if (comments.length === 0) {
+        document.querySelectorAll('[data-testid*="comment-base-item"], .activity-comment').forEach((el) => {
+          const authorEl = el.querySelector('[data-testid*="header-author"] span, .author');
+          const timeEl = el.querySelector('time[datetime]');
+          const bodyEl = el.querySelector('[data-testid*="comment-body"], .comment-body');
+          if (bodyEl) {
+            comments.push({
+              author: authorEl?.textContent.trim() || 'Unknown',
+              date: timeEl?.getAttribute('datetime') || '',
+              body: domToMarkdown(bodyEl.cloneNode(true)).trim()
+            });
+          }
+        });
+      }
+    } catch (e) {
+      console.error('ContextJira: comment extraction failed', e);
     }
 
     return comments;
