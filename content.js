@@ -573,7 +573,7 @@
       </div>` : ''}
 
       <div class="cj-footer">
-        <span class="cj-shortcut-hint">${isMac ? 'Ctrl+Shift+J' : 'Alt+Shift+J'} to toggle</span>
+        <span class="cj-shortcut-hint">${isMac ? 'Ctrl+Shift+J' : 'Ctrl+Shift+K'} to toggle</span>
       </div>
     `;
 
@@ -721,12 +721,12 @@
 
   // ─── Keyboard shortcut ──────────────────────────────────────────
   // Mac: Ctrl+Shift+J (no conflict)
-  // Windows/Linux: Alt+Shift+J (Ctrl+Shift+J opens DevTools)
+  // Windows/Linux: Ctrl+Shift+K (Ctrl+Shift+J opens DevTools, Alt+Shift switches keyboard layout)
 
   document.addEventListener('keydown', (e) => {
     const match = isMac
       ? (e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'J'
-      : e.altKey && e.shiftKey && e.key === 'J';
+      : e.ctrlKey && e.shiftKey && e.key === 'K';
     if (match) {
       e.preventDefault();
       createPanel();
