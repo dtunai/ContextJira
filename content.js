@@ -73,7 +73,8 @@
         md += child.textContent;
       } else if (child.nodeType === Node.ELEMENT_NODE) {
         // Skip hidden elements (edit views, collapsed sections)
-        if (child.hidden || child.getAttribute('aria-hidden') === 'true' ||
+        // Note: do NOT check aria-hidden — Jira's renderer uses it on visible content
+        if (child.hidden ||
             child.style?.display === 'none' || child.classList?.contains('hidden')) continue;
         const tag = child.tagName.toLowerCase();
         const role = child.getAttribute('role');
