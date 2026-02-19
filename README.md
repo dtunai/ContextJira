@@ -46,7 +46,7 @@ ContextJira sits on any Jira page and extracts issue data into clean, structured
 
 | Action | How |
 |---|---|
-| Open panel | Click the floating button (bottom-right) or press `Ctrl+Shift+J` |
+| Open panel | Click the floating button (bottom-right) or press `Ctrl+Shift+J` (Mac) / `Alt+Shift+J` (Windows/Linux) |
 | Copy full context | Click **"Copy Full Context as Markdown"** |
 | Copy title only | Click **Title** |
 | Copy description only | Click **Description** |

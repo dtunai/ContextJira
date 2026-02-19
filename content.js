@@ -4,6 +4,10 @@
   if (window.__contextJiraLoaded) return;
   window.__contextJiraLoaded = true;
 
+  // ─── Platform ────────────────────────────────────────────────────
+  const isMac = navigator.platform.toUpperCase().includes('MAC') ||
+                navigator.userAgent.includes('Macintosh');
+
   // ─── State ───────────────────────────────────────────────────────
   let panel = null;
   let downloadFolder = '';
@@ -569,7 +573,7 @@
       </div>` : ''}
 
       <div class="cj-footer">
-        <span class="cj-shortcut-hint">Ctrl+Shift+J to toggle</span>
+        <span class="cj-shortcut-hint">${isMac ? 'Ctrl+Shift+J' : 'Alt+Shift+J'} to toggle</span>
       </div>
     `;
 
@@ -716,9 +720,14 @@
   }
 
   // ─── Keyboard shortcut ──────────────────────────────────────────
+  // Mac: Ctrl+Shift+J (no conflict)
+  // Windows/Linux: Alt+Shift+J (Ctrl+Shift+J opens DevTools)
 
   document.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'J') {
+    const match = isMac
+      ? (e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'J'
+      : e.altKey && e.shiftKey && e.key === 'J';
+    if (match) {
       e.preventDefault();
       createPanel();
     }
