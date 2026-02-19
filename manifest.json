@@ -1,0 +1,39 @@
+{
+  "manifest_version": 3,
+  "name": "ContextJira",
+  "version": "2.0.0",
+  "description": "AI-Native Context Selection for Jira Tasks. Extract structured markdown context from any Jira issue — ready to paste into Claude, ChatGPT, or any LLM.",
+  "permissions": [
+    "activeTab",
+    "downloads",
+    "storage",
+    "clipboardWrite",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["detector.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
